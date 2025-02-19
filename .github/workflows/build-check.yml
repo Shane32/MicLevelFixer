@@ -24,3 +24,4 @@ jobs:
 
       - name: Build solution
         run: dotnet build --no-restore -c Debug
+        working-directory: MicLevelFixer

@@ -24,3 +24,4 @@ jobs:
 
       - name: Check formatting
         run: dotnet format --verify-no-changes --severity error
+        working-directory: MicLevelFixer
