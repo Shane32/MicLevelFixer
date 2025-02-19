@@ -6,6 +6,11 @@
     <RootNamespace>MicLevelFixer</RootNamespace>
     <AssemblyName>MicLevelFixer</AssemblyName>
     <ApplicationIcon>Resources\AppIcon.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
