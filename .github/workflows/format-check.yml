@@ -20,8 +20,6 @@ jobs:
           
       - name: Restore dependencies
         run: dotnet restore
-        working-directory: MicLevelFixer
 
       - name: Check formatting
-        run: dotnet format MicLevelFixer.csproj --verify-no-changes --severity error
-        working-directory: MicLevelFixer
+        run: dotnet format --verify-no-changes --severity error
