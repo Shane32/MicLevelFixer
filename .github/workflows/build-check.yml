@@ -20,6 +20,7 @@ jobs:
 
       - name: Restore packages for solution
         run: dotnet restore
+        working-directory: MicLevelFixer
 
       - name: Build solution
         run: dotnet build --no-restore -c Debug
