@@ -89,7 +89,7 @@ namespace MicLevelFixer
         private void OnAboutClicked(object sender, EventArgs e)
         {
             MessageBox.Show(
-                "Microphone Level Enforcer\n" +
+                "MicLevelFixer\n" +
                 "Version 1.0\n\n" +
                 "SACK Corporation",
                 "About",
@@ -134,6 +134,8 @@ namespace MicLevelFixer
 
         private CoreAudioController _audioController;
         private List<CoreAudioDevice> _captureDevices;
+        private ToolTip toolTip1 = new ToolTip();
+        private int _lastHoveredIndex = -1;
 
         public OptionsForm()
         {
@@ -289,6 +291,32 @@ namespace MicLevelFixer
 
             // Interval from user settings
             numericInterval.Value = UserSettings.CheckIntervalSeconds;
+            listMicSettings.MouseMove += listMicSettings_MouseMove;
+        }
+
+        private void listMicSettings_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Figure out which item is under the mouse
+            int index = listMicSettings.IndexFromPoint(e.Location);
+
+            // Only update the tooltip if we moved to a different item
+            if (index != _lastHoveredIndex) {
+                _lastHoveredIndex = index;
+
+                if (index >= 0) {
+                    // We have a valid item
+
+                    // Show the *full* device name in the tooltip
+                    if (listMicSettings.Items[index] is MicSetting item && !string.IsNullOrEmpty(item.DeviceName)) {
+                        toolTip1.SetToolTip(listMicSettings, item.DeviceName);
+                    } else {
+                        toolTip1.SetToolTip(listMicSettings, string.Empty);
+                    }
+                } else {
+                    // Mouse is not over a valid list item
+                    toolTip1.SetToolTip(listMicSettings, string.Empty);
+                }
+            }
         }
 
         private void BtnAdd_Click(object sender, EventArgs e)
@@ -442,11 +470,22 @@ namespace MicLevelFixer
         public string DeviceId { get; set; }
         public string DeviceName { get; set; }
         public int Volume { get; set; }
+        private string TruncatedDeviceName
+        {
+            get {
+                if (string.IsNullOrWhiteSpace(DeviceName))
+                    return DeviceId; // fallback if there's no friendly name
+
+                if (DeviceName.Length <= 20)
+                    return DeviceName;
+                else
+                    return DeviceName.Substring(0, 20 - 3) + "...";
+            }
+        }
 
         public override string ToString()
         {
-            var nameToShow = string.IsNullOrWhiteSpace(DeviceName) ? DeviceId : DeviceName;
-            return string.Format("DeviceName: {0}, Volume: {1}%", nameToShow, Volume);
+            return string.Format("DeviceName: {0}, Volume: {1}%", TruncatedDeviceName, Volume);
         }
     }
 
