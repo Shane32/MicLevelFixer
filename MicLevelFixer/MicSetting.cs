@@ -1,4 +1,4 @@
-﻿namespace MicLevelFixer
+namespace MicLevelFixer
 {
     /// <summary>
     /// Simple data class to hold a microphone's device ID and target volume.
