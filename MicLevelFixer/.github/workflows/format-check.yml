@@ -1,3 +1,5 @@
+name: Check formatting
+
 on:
   pull_request:
   push:
@@ -5,8 +7,7 @@ on:
       - main
 
 jobs:
-  build_net:
-    name: Format check
+  format:
     runs-on: 'windows-latest'
     steps:
       - name: Checkout repository

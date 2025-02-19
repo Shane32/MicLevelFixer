@@ -1,3 +1,5 @@
+name: Build check
+
 on:
   pull_request:
   push:
@@ -5,8 +7,7 @@ on:
       - main
 
 jobs:
-  build_net:
-    name: Build check
+  build:
     runs-on: 'windows-latest'
     steps:
       - name: Checkout repository
