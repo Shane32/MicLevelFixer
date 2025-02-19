@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -43,8 +43,7 @@ namespace MicLevelFixer
             _intervalSeconds = UserSettings.CheckIntervalSeconds; // default 60 if not found
 
             // 2. Create the tray icon & context menu
-            _trayIcon = new NotifyIcon
-            {
+            _trayIcon = new NotifyIcon {
                 // If you have an embedded icon, use it here. Otherwise, set Visible=true and remove 'Icon' if no icon is available.
                 Icon = Properties.Resources.AppIcon,
                 Text = "Microphone Level Enforcer",
@@ -77,11 +76,9 @@ namespace MicLevelFixer
 
         private void OnConfigureClicked(object sender, EventArgs e)
         {
-            using (var form = new OptionsForm())
-            {
+            using (var form = new OptionsForm()) {
                 // Show config dialog. If user presses OK, re-load settings in case they changed.
-                if (form.ShowDialog() == DialogResult.OK)
-                {
+                if (form.ShowDialog() == DialogResult.OK) {
                     UserSettings.LoadFromRegistry();
                     _intervalSeconds = UserSettings.CheckIntervalSeconds;
                     _timer.Interval = _intervalSeconds * 1000;
@@ -163,8 +160,7 @@ namespace MicLevelFixer
         private void InitializeControls()
         {
             // Device Label
-            lblDevices = new Label
-            {
+            lblDevices = new Label {
                 Text = "Select Microphone:",
                 AutoSize = true,
                 Location = new Point(10, 15)
@@ -172,8 +168,7 @@ namespace MicLevelFixer
             this.Controls.Add(lblDevices);
 
             // ComboBox for devices
-            comboDevices = new ComboBox
-            {
+            comboDevices = new ComboBox {
                 Location = new Point(130, 10),
                 Width = 300,
                 DropDownStyle = ComboBoxStyle.DropDownList
@@ -181,8 +176,7 @@ namespace MicLevelFixer
             this.Controls.Add(comboDevices);
 
             // Volume label
-            lblVolume = new Label
-            {
+            lblVolume = new Label {
                 Text = "Volume (1–100):",
                 AutoSize = true,
                 Location = new Point(10, 55)
@@ -190,8 +184,7 @@ namespace MicLevelFixer
             this.Controls.Add(lblVolume);
 
             // NumericUpDown for volume
-            numericVolume = new NumericUpDown
-            {
+            numericVolume = new NumericUpDown {
                 Location = new Point(130, 50),
                 Width = 80,
                 Minimum = 1,
@@ -201,8 +194,7 @@ namespace MicLevelFixer
             this.Controls.Add(numericVolume);
 
             // Add/Update button
-            btnAdd = new Button
-            {
+            btnAdd = new Button {
                 Text = "Add/Update",
                 Location = new Point(220, 48),
                 Width = 100
@@ -211,8 +203,7 @@ namespace MicLevelFixer
             this.Controls.Add(btnAdd);
 
             // Mic settings label
-            lblMicSettings = new Label
-            {
+            lblMicSettings = new Label {
                 Text = "Configured Microphones:",
                 AutoSize = true,
                 Location = new Point(10, 95)
@@ -220,16 +211,14 @@ namespace MicLevelFixer
             this.Controls.Add(lblMicSettings);
 
             // List box for existing mic settings
-            listMicSettings = new ListBox
-            {
+            listMicSettings = new ListBox {
                 Location = new Point(10, 115),
                 Size = new Size(460, 140)
             };
             this.Controls.Add(listMicSettings);
 
             // Remove button
-            btnRemove = new Button
-            {
+            btnRemove = new Button {
                 Text = "Remove",
                 Location = new Point(10, 265),
                 Width = 80
@@ -238,8 +227,7 @@ namespace MicLevelFixer
             this.Controls.Add(btnRemove);
 
             // Interval label
-            lblInterval = new Label
-            {
+            lblInterval = new Label {
                 Text = "Check Interval (seconds):",
                 AutoSize = true,
                 Location = new Point(10, 310)
@@ -247,8 +235,7 @@ namespace MicLevelFixer
             this.Controls.Add(lblInterval);
 
             // Numeric for interval
-            numericInterval = new NumericUpDown
-            {
+            numericInterval = new NumericUpDown {
                 Location = new Point(170, 305),
                 Width = 80,
                 Minimum = 5,
@@ -258,8 +245,7 @@ namespace MicLevelFixer
             this.Controls.Add(numericInterval);
 
             // OK button
-            btnOK = new Button
-            {
+            btnOK = new Button {
                 Text = "OK",
                 Location = new Point(310, 320),
                 Width = 75,
@@ -269,8 +255,7 @@ namespace MicLevelFixer
             this.Controls.Add(btnOK);
 
             // Cancel button
-            btnCancel = new Button
-            {
+            btnCancel = new Button {
                 Text = "Cancel",
                 Location = new Point(395, 320),
                 Width = 75,
@@ -298,8 +283,7 @@ namespace MicLevelFixer
 
             // Load existing mic settings to list
             listMicSettings.Items.Clear();
-            foreach (var ms in UserSettings.MicSettings)
-            {
+            foreach (var ms in UserSettings.MicSettings) {
                 listMicSettings.Items.Add(ms);
             }
 
@@ -315,8 +299,7 @@ namespace MicLevelFixer
             var selectedDevice = (CoreAudioDevice)comboDevices.SelectedItem;
             int volume = (int)numericVolume.Value;
 
-            var newMicSetting = new MicSetting
-            {
+            var newMicSetting = new MicSetting {
                 DeviceId = selectedDevice.Id.ToString(),
                 DeviceName = selectedDevice.FullName,
                 Volume = volume
@@ -326,22 +309,18 @@ namespace MicLevelFixer
             var existing = UserSettings.MicSettings
                 .FirstOrDefault(m => m.DeviceId == newMicSetting.DeviceId);
 
-            if (existing == null)
-            {
+            if (existing == null) {
                 // Add new
                 UserSettings.MicSettings.Add(newMicSetting);
                 listMicSettings.Items.Add(newMicSetting);
-            }
-            else
-            {
+            } else {
                 // Update volume
                 existing.Volume = volume;
                 existing.DeviceName = selectedDevice.FullName;
 
                 // Refresh display in list
                 int index = listMicSettings.Items.IndexOf(existing);
-                if (index >= 0)
-                {
+                if (index >= 0) {
                     listMicSettings.Items.RemoveAt(index);
                     listMicSettings.Items.Insert(index, existing);
                 }
@@ -350,8 +329,7 @@ namespace MicLevelFixer
 
         private void BtnRemove_Click(object sender, EventArgs e)
         {
-            var selected = listMicSettings.SelectedItem as MicSetting;
-            if (selected == null)
+            if (!(listMicSettings.SelectedItem is MicSetting selected))
                 return;
 
             UserSettings.MicSettings.Remove(selected);
@@ -391,41 +369,31 @@ namespace MicLevelFixer
         {
             MicSettings.Clear();
 
-            using (var key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, false))
-            {
+            using (var key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, false)) {
                 if (key == null)
                     return;
 
                 // Load check interval
                 var intervalStr = key.GetValue("CheckIntervalSeconds") as string;
-                int parsedInterval;
-                if (int.TryParse(intervalStr, out parsedInterval))
-                {
+                if (int.TryParse(intervalStr, out var parsedInterval)) {
                     CheckIntervalSeconds = parsedInterval;
-                }
-                else
-                {
+                } else {
                     CheckIntervalSeconds = 60; // fallback
                 }
 
                 // Load mic subkeys: Mic0, Mic1, ...
                 int i = 0;
-                while (true)
-                {
+                while (true) {
                     string subKeyName = "Mic" + i;
-                    using (var micKey = key.OpenSubKey(subKeyName, false))
-                    {
+                    using (var micKey = key.OpenSubKey(subKeyName, false)) {
                         if (micKey == null)
                             break;
 
                         var deviceId = micKey.GetValue("DeviceId") as string;
                         var deviceName = micKey.GetValue("DeviceName") as string;
                         var volumeStr = micKey.GetValue("Volume") as string;
-                        if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrEmpty(volumeStr))
-                        {
-                            int vol;
-                            if (int.TryParse(volumeStr, out vol))
-                            {
+                        if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrEmpty(volumeStr)) {
+                            if (int.TryParse(volumeStr, out var vol)) {
                                 MicSettings.Add(new MicSetting { DeviceId = deviceId, DeviceName = deviceName, Volume = vol });
                             }
                         }
@@ -437,18 +405,15 @@ namespace MicLevelFixer
 
         public static void SaveToRegistry()
         {
-            using (var key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath))
-            {
+            using (var key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath)) {
                 // Save check interval
                 key.SetValue("CheckIntervalSeconds", CheckIntervalSeconds.ToString());
 
                 // Clean existing subkeys first
                 int i = 0;
-                while (true)
-                {
+                while (true) {
                     string subKeyName = "Mic" + i;
-                    using (var existing = key.OpenSubKey(subKeyName))
-                    {
+                    using (var existing = key.OpenSubKey(subKeyName)) {
                         if (existing == null)
                             break;
                         key.DeleteSubKey(subKeyName);
@@ -457,11 +422,9 @@ namespace MicLevelFixer
                 }
 
                 // Write new subkeys
-                for (int j = 0; j < MicSettings.Count; j++)
-                {
+                for (int j = 0; j < MicSettings.Count; j++) {
                     string subKeyName = "Mic" + j;
-                    using (var micKey = key.CreateSubKey(subKeyName))
-                    {
+                    using (var micKey = key.CreateSubKey(subKeyName)) {
                         micKey.SetValue("DeviceId", MicSettings[j].DeviceId);
                         micKey.SetValue("DeviceName", MicSettings[j].DeviceName);
                         micKey.SetValue("Volume", MicSettings[j].Volume.ToString());
@@ -497,14 +460,14 @@ namespace MicLevelFixer
         public static void EnforceConfiguredVolumes()
         {
             // For each configured microphone device, set the volume if it differs
-            foreach (var ms in UserSettings.MicSettings)
-            {
+            foreach (var ms in UserSettings.MicSettings) {
                 int desiredVolume = ms.Volume;
-                if (desiredVolume < 0) desiredVolume = 0;
-                if (desiredVolume > 100) desiredVolume = 100;
+                if (desiredVolume < 0)
+                    desiredVolume = 0;
+                if (desiredVolume > 100)
+                    desiredVolume = 100;
 
-                Guid deviceGuid;
-                if (!Guid.TryParse(ms.DeviceId, out deviceGuid))
+                if (!Guid.TryParse(ms.DeviceId, out var deviceGuid))
                     continue;
 
                 // Attempt to get the device
@@ -513,8 +476,7 @@ namespace MicLevelFixer
                     continue; // device not found or inactive
 
                 var currentVolume = device.Volume;
-                if (Math.Abs(currentVolume - desiredVolume) > 0.5f)
-                {
+                if (Math.Abs(currentVolume - desiredVolume) > 0.5f) {
                     // Set volume
                     device.Volume = desiredVolume;
                 }
