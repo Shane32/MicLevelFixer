@@ -11,9 +11,14 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AnalysisMode>Recommended</AnalysisMode>
     <DebugType>embedded</DebugType>
-    <GenerateResourceUsePreserializedResources>false</GenerateResourceUsePreserializedResources>
 	  <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resources\AppIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\AppIcon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AudioSwitcher.AudioApi.CoreAudio" Version="3.0.3" />
