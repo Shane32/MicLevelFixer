@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
@@ -19,10 +20,14 @@ public class TrayAppContext : ApplicationContext
         UserSettings.LoadFromRegistry();
         _intervalSeconds = UserSettings.CheckIntervalSeconds; // default 60 if not found
 
+        using var iconFile = Assembly.GetExecutingAssembly().GetManifestResourceStream("MicLevelFixer.Resources.AppIcon.ico")
+            ?? throw new InvalidOperationException("Icon not found in resources.");
+        var icon = new Icon(iconFile);
+
         // 2. Create the tray icon & context menu
         _trayIcon = new NotifyIcon {
             // If you have an embedded icon, use it here. Otherwise, set Visible=true and remove 'Icon' if no icon is available.
-            Icon = Properties.Resources.AppIcon,
+            Icon = icon,
             Text = "Microphone Level Enforcer",
             Visible = true,
             ContextMenuStrip = BuildContextMenu()
