@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
@@ -19,9 +20,9 @@ public class TrayAppContext : ApplicationContext
         UserSettings.LoadFromRegistry();
         _intervalSeconds = UserSettings.CheckIntervalSeconds; // default 60 if not found
 
-        var iconFile = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("MicLevelFixer.Resources.AppIcon.ico")
+        using var iconFile = Assembly.GetExecutingAssembly().GetManifestResourceStream("MicLevelFixer.Resources.AppIcon.ico")
             ?? throw new InvalidOperationException("Icon not found in resources.");
-        var icon = new System.Drawing.Icon(iconFile);
+        var icon = new Icon(iconFile);
 
         // 2. Create the tray icon & context menu
         _trayIcon = new NotifyIcon {
