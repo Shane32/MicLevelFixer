@@ -8,7 +8,7 @@ on:
 
 jobs:
   format:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository
@@ -16,8 +16,6 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: ./global.json
           
       - name: Restore dependencies
         run: dotnet restore
