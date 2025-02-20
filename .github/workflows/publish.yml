@@ -10,7 +10,8 @@ jobs:
     runs-on: windows-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -19,8 +20,7 @@ jobs:
         run: dotnet restore
       
       - name: Build and Publish
-        run: |
-          dotnet publish MicLevelFixer/MicLevelFixer.csproj -c Release -o publish
+        run: dotnet publish MicLevelFixer/MicLevelFixer.csproj -c Release -o publish
       
       - name: Create ZIP archive
         run: Compress-Archive -Path publish/* -DestinationPath MicLevelFixer.zip
