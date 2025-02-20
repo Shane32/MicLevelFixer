@@ -12,7 +12,7 @@
     <AnalysisMode>Recommended</AnalysisMode>
     <DebugType>embedded</DebugType>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
-	<LangVersion>10</LangVersion>
+	  <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
