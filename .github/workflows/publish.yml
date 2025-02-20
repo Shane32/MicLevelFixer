@@ -1,0 +1,46 @@
+name: Publish Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Build and Publish
+        run: dotnet publish MicLevelFixer/MicLevelFixer.csproj -c Release -o publish
+      
+      - name: Create ZIP archive
+        run: Compress-Archive -Path publish/* -DestinationPath MicLevelFixer.zip
+      
+      - name: Upload MicLevelFixer.zip as Release Asset
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const fileData = fs.readFileSync(path.join(process.cwd(), 'MicLevelFixer.zip'));
+            const uploadResult = await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: context.payload.release.id,
+              name: 'MicLevelFixer.zip',
+              data: fileData,
+              headers: {
+                'content-type': 'application/zip',
+                'content-length': fileData.length,
+              },
+            });
