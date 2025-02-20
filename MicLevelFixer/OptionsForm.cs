@@ -6,274 +6,266 @@ using System.Windows.Forms;
 using AudioSwitcher.AudioApi;
 using AudioSwitcher.AudioApi.CoreAudio;
 
-namespace MicLevelFixer
+namespace MicLevelFixer;
+
+/// <summary>
+/// A form to configure the microphone levels, including the check interval.
+/// </summary>
+public class OptionsForm : Form
 {
-    /// <summary>
-    /// A form to configure the microphone levels, including the check interval.
-    /// </summary>
-    public class OptionsForm : Form
+    // Controls
+    private readonly ComboBox _comboDevices;
+    private readonly Label _lblDevices;
+    private readonly NumericUpDown _numericVolume;
+    private readonly Label _lblVolume;
+    private readonly NumericUpDown _numericInterval;
+    private readonly Label _lblInterval;
+    private readonly Button _btnAdd;
+    private readonly Button _btnRemove;
+    private readonly Button _btnOK;
+    private readonly Button _btnCancel;
+    private readonly ListBox _listMicSettings;
+    private readonly Label _lblMicSettings;
+
+    private readonly CoreAudioController _audioController;
+    private readonly ToolTip _toolTip1 = new ToolTip();
+    private int _lastHoveredIndex = -1;
+
+    public OptionsForm()
     {
-        // Controls
-        private ComboBox comboDevices;
-        private Label lblDevices;
-        private NumericUpDown numericVolume;
-        private Label lblVolume;
-        private NumericUpDown numericInterval;
-        private Label lblInterval;
-        private Button btnAdd;
-        private Button btnRemove;
-        private Button btnOK;
-        private Button btnCancel;
-        private ListBox listMicSettings;
-        private Label lblMicSettings;
+        // Basic form setup
+        Text = "Microphone Options";
+        Size = new Size(500, 400);
+        StartPosition = FormStartPosition.CenterScreen;
+        FormBorderStyle = FormBorderStyle.FixedDialog;
+        MaximizeBox = false;
+        MinimizeBox = false;
+        ShowInTaskbar = false;
+        Font = new Font("Segoe UI", 9);
 
-        private CoreAudioController _audioController;
-        private List<CoreAudioDevice> _captureDevices;
-        private ToolTip toolTip1 = new ToolTip();
-        private int _lastHoveredIndex = -1;
+        // Initialize audio controller
+        _audioController = new CoreAudioController();
 
-        public OptionsForm()
-        {
-            // Basic form setup
-            this.Text = "Microphone Options";
-            this.Size = new Size(500, 400);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.ShowInTaskbar = false;
-            this.Font = new Font("Segoe UI", 9);
+        // Device Label
+        _lblDevices = new Label {
+            Text = "Select Microphone:",
+            AutoSize = true,
+            Location = new Point(10, 15)
+        };
+        Controls.Add(_lblDevices);
 
-            // Initialize audio controller
-            _audioController = new CoreAudioController();
+        // ComboBox for devices
+        _comboDevices = new ComboBox {
+            Location = new Point(130, 10),
+            Width = 300,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+        Controls.Add(_comboDevices);
 
-            // Manually create & configure controls
-            InitializeControls();
+        // Volume label
+        _lblVolume = new Label {
+            Text = "Volume (1–100):",
+            AutoSize = true,
+            Location = new Point(10, 55)
+        };
+        Controls.Add(_lblVolume);
 
-            // Load event for final data binding
-            this.Load += OptionsForm_Load;
-        }
+        // NumericUpDown for volume
+        _numericVolume = new NumericUpDown {
+            Location = new Point(130, 50),
+            Width = 80,
+            Minimum = 1,
+            Maximum = 100,
+            Value = 50
+        };
+        Controls.Add(_numericVolume);
 
-        private void InitializeControls()
-        {
-            // Device Label
-            lblDevices = new Label {
-                Text = "Select Microphone:",
-                AutoSize = true,
-                Location = new Point(10, 15)
-            };
-            this.Controls.Add(lblDevices);
+        // Add/Update button
+        _btnAdd = new Button {
+            Text = "Add/Update",
+            Location = new Point(220, 48),
+            Width = 100
+        };
+        _btnAdd.Click += BtnAdd_Click;
+        Controls.Add(_btnAdd);
 
-            // ComboBox for devices
-            comboDevices = new ComboBox {
-                Location = new Point(130, 10),
-                Width = 300,
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            this.Controls.Add(comboDevices);
+        // Mic settings label
+        _lblMicSettings = new Label {
+            Text = "Configured Microphones:",
+            AutoSize = true,
+            Location = new Point(10, 95)
+        };
+        Controls.Add(_lblMicSettings);
 
-            // Volume label
-            lblVolume = new Label {
-                Text = "Volume (1–100):",
-                AutoSize = true,
-                Location = new Point(10, 55)
-            };
-            this.Controls.Add(lblVolume);
+        // List box for existing mic settings
+        _listMicSettings = new ListBox {
+            Location = new Point(10, 115),
+            Size = new Size(460, 140)
+        };
+        Controls.Add(_listMicSettings);
 
-            // NumericUpDown for volume
-            numericVolume = new NumericUpDown {
-                Location = new Point(130, 50),
-                Width = 80,
-                Minimum = 1,
-                Maximum = 100,
-                Value = 50
-            };
-            this.Controls.Add(numericVolume);
+        // Remove button
+        _btnRemove = new Button {
+            Text = "Remove",
+            Location = new Point(10, 265),
+            Width = 80
+        };
+        _btnRemove.Click += BtnRemove_Click;
+        Controls.Add(_btnRemove);
 
-            // Add/Update button
-            btnAdd = new Button {
-                Text = "Add/Update",
-                Location = new Point(220, 48),
-                Width = 100
-            };
-            btnAdd.Click += BtnAdd_Click;
-            this.Controls.Add(btnAdd);
+        // Interval label
+        _lblInterval = new Label {
+            Text = "Check Interval (seconds):",
+            AutoSize = true,
+            Location = new Point(10, 310)
+        };
+        Controls.Add(_lblInterval);
 
-            // Mic settings label
-            lblMicSettings = new Label {
-                Text = "Configured Microphones:",
-                AutoSize = true,
-                Location = new Point(10, 95)
-            };
-            this.Controls.Add(lblMicSettings);
+        // Numeric for interval
+        _numericInterval = new NumericUpDown {
+            Location = new Point(170, 305),
+            Width = 80,
+            Minimum = 5,
+            Maximum = 3600,
+            Value = 60 // default
+        };
+        Controls.Add(_numericInterval);
 
-            // List box for existing mic settings
-            listMicSettings = new ListBox {
-                Location = new Point(10, 115),
-                Size = new Size(460, 140)
-            };
-            this.Controls.Add(listMicSettings);
+        // OK button
+        _btnOK = new Button {
+            Text = "OK",
+            Location = new Point(310, 320),
+            Width = 75,
+            DialogResult = DialogResult.OK
+        };
+        _btnOK.Click += BtnOK_Click;
+        Controls.Add(_btnOK);
 
-            // Remove button
-            btnRemove = new Button {
-                Text = "Remove",
-                Location = new Point(10, 265),
-                Width = 80
-            };
-            btnRemove.Click += BtnRemove_Click;
-            this.Controls.Add(btnRemove);
+        // Cancel button
+        _btnCancel = new Button {
+            Text = "Cancel",
+            Location = new Point(395, 320),
+            Width = 75,
+            DialogResult = DialogResult.Cancel
+        };
+        _btnCancel.Click += BtnCancel_Click;
+        Controls.Add(_btnCancel);
 
-            // Interval label
-            lblInterval = new Label {
-                Text = "Check Interval (seconds):",
-                AutoSize = true,
-                Location = new Point(10, 310)
-            };
-            this.Controls.Add(lblInterval);
+        // Set default accept/cancel buttons
+        AcceptButton = _btnOK;
+        CancelButton = _btnCancel;
 
-            // Numeric for interval
-            numericInterval = new NumericUpDown {
-                Location = new Point(170, 305),
-                Width = 80,
-                Minimum = 5,
-                Maximum = 3600,
-                Value = 60 // default
-            };
-            this.Controls.Add(numericInterval);
+        // Load event for final data binding
+        Load += OptionsForm_Load;
+    }
 
-            // OK button
-            btnOK = new Button {
-                Text = "OK",
-                Location = new Point(310, 320),
-                Width = 75,
-                DialogResult = DialogResult.OK
-            };
-            btnOK.Click += BtnOK_Click;
-            this.Controls.Add(btnOK);
-
-            // Cancel button
-            btnCancel = new Button {
-                Text = "Cancel",
-                Location = new Point(395, 320),
-                Width = 75,
-                DialogResult = DialogResult.Cancel
-            };
-            btnCancel.Click += BtnCancel_Click;
-            this.Controls.Add(btnCancel);
-
-            // Set default accept/cancel buttons
-            this.AcceptButton = btnOK;
-            this.CancelButton = btnCancel;
-        }
-
-        private void OptionsForm_Load(object sender, EventArgs e)
-        {
-            // Load audio devices
-            _captureDevices = _audioController
+    private void OptionsForm_Load(object sender, EventArgs e)
+    {
+        // Load audio devices
+        var captureDevices = _audioController
                 .GetDevices(DeviceType.Capture, DeviceState.Active)
                 .OrderBy(d => d.FullName)
                 .ToList();
 
-            comboDevices.DataSource = _captureDevices;
-            comboDevices.DisplayMember = "FullName";
-            comboDevices.ValueMember = "Id";
+        _comboDevices.DataSource = captureDevices;
+        _comboDevices.DisplayMember = "FullName";
+        _comboDevices.ValueMember = "Id";
 
-            // Load existing mic settings to list
-            listMicSettings.Items.Clear();
-            foreach (var ms in UserSettings.MicSettings) {
-                listMicSettings.Items.Add(ms);
-            }
-
-            // Interval from user settings
-            numericInterval.Value = UserSettings.CheckIntervalSeconds;
-            listMicSettings.MouseMove += listMicSettings_MouseMove;
+        // Load existing mic settings to list
+        _listMicSettings.Items.Clear();
+        foreach (var ms in UserSettings.MicSettings) {
+            _listMicSettings.Items.Add(ms);
         }
 
-        private void listMicSettings_MouseMove(object sender, MouseEventArgs e)
-        {
-            // Figure out which item is under the mouse
-            int index = listMicSettings.IndexFromPoint(e.Location);
+        // Interval from user settings
+        _numericInterval.Value = UserSettings.CheckIntervalSeconds;
+        _listMicSettings.MouseMove += listMicSettings_MouseMove;
+    }
 
-            // Only update the tooltip if we moved to a different item
-            if (index != _lastHoveredIndex) {
-                _lastHoveredIndex = index;
+    private void listMicSettings_MouseMove(object sender, MouseEventArgs e)
+    {
+        // Figure out which item is under the mouse
+        int index = _listMicSettings.IndexFromPoint(e.Location);
 
-                if (index >= 0) {
-                    // We have a valid item
+        // Only update the tooltip if we moved to a different item
+        if (index != _lastHoveredIndex) {
+            _lastHoveredIndex = index;
 
-                    // Show the *full* device name in the tooltip
-                    if (listMicSettings.Items[index] is MicSetting item && !string.IsNullOrEmpty(item.DeviceName)) {
-                        toolTip1.SetToolTip(listMicSettings, item.DeviceName);
-                    } else {
-                        toolTip1.SetToolTip(listMicSettings, string.Empty);
-                    }
+            if (index >= 0) {
+                // We have a valid item
+
+                // Show the *full* device name in the tooltip
+                if (_listMicSettings.Items[index] is MicSetting item && !string.IsNullOrEmpty(item.DeviceName)) {
+                    _toolTip1.SetToolTip(_listMicSettings, item.DeviceName);
                 } else {
-                    // Mouse is not over a valid list item
-                    toolTip1.SetToolTip(listMicSettings, string.Empty);
+                    _toolTip1.SetToolTip(_listMicSettings, string.Empty);
                 }
-            }
-        }
-
-        private void BtnAdd_Click(object sender, EventArgs e)
-        {
-            if (comboDevices.SelectedItem == null)
-                return;
-
-            var selectedDevice = (CoreAudioDevice)comboDevices.SelectedItem;
-            int volume = (int)numericVolume.Value;
-
-            var newMicSetting = new MicSetting {
-                DeviceId = selectedDevice.Id.ToString(),
-                DeviceName = selectedDevice.FullName,
-                Volume = volume
-            };
-
-            // Check if there's an existing entry for this device
-            var existing = UserSettings.MicSettings
-                .FirstOrDefault(m => m.DeviceId == newMicSetting.DeviceId);
-
-            if (existing == null) {
-                // Add new
-                UserSettings.MicSettings.Add(newMicSetting);
-                listMicSettings.Items.Add(newMicSetting);
             } else {
-                // Update volume
-                existing.Volume = volume;
-                existing.DeviceName = selectedDevice.FullName;
-
-                // Refresh display in list
-                int index = listMicSettings.Items.IndexOf(existing);
-                if (index >= 0) {
-                    listMicSettings.Items.RemoveAt(index);
-                    listMicSettings.Items.Insert(index, existing);
-                }
+                // Mouse is not over a valid list item
+                _toolTip1.SetToolTip(_listMicSettings, string.Empty);
             }
         }
+    }
 
-        private void BtnRemove_Click(object sender, EventArgs e)
-        {
-            if (!(listMicSettings.SelectedItem is MicSetting selected))
-                return;
+    private void BtnAdd_Click(object sender, EventArgs e)
+    {
+        if (_comboDevices.SelectedItem == null)
+            return;
 
-            UserSettings.MicSettings.Remove(selected);
-            listMicSettings.Items.Remove(selected);
+        var selectedDevice = (CoreAudioDevice)_comboDevices.SelectedItem;
+        int volume = (int)_numericVolume.Value;
+
+        var newMicSetting = new MicSetting {
+            DeviceId = selectedDevice.Id.ToString(),
+            DeviceName = selectedDevice.FullName,
+            Volume = volume
+        };
+
+        // Check if there's an existing entry for this device
+        var existing = UserSettings.MicSettings
+            .FirstOrDefault(m => m.DeviceId == newMicSetting.DeviceId);
+
+        if (existing == null) {
+            // Add new
+            UserSettings.MicSettings.Add(newMicSetting);
+            _listMicSettings.Items.Add(newMicSetting);
+        } else {
+            // Update volume
+            existing.Volume = volume;
+            existing.DeviceName = selectedDevice.FullName;
+
+            // Refresh display in list
+            int index = _listMicSettings.Items.IndexOf(existing);
+            if (index >= 0) {
+                _listMicSettings.Items.RemoveAt(index);
+                _listMicSettings.Items.Insert(index, existing);
+            }
         }
+    }
 
-        private void BtnOK_Click(object sender, EventArgs e)
-        {
-            // Save interval
-            UserSettings.CheckIntervalSeconds = (int)numericInterval.Value;
-            // Persist to registry
-            UserSettings.SaveToRegistry();
+    private void BtnRemove_Click(object sender, EventArgs e)
+    {
+        if (!(_listMicSettings.SelectedItem is MicSetting selected))
+            return;
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
-        }
+        UserSettings.MicSettings.Remove(selected);
+        _listMicSettings.Items.Remove(selected);
+    }
 
-        private void BtnCancel_Click(object sender, EventArgs e)
-        {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
-        }
+    private void BtnOK_Click(object sender, EventArgs e)
+    {
+        // Save interval
+        UserSettings.CheckIntervalSeconds = (int)_numericInterval.Value;
+        // Persist to registry
+        UserSettings.SaveToRegistry();
+
+        DialogResult = DialogResult.OK;
+        Close();
+    }
+
+    private void BtnCancel_Click(object sender, EventArgs e)
+    {
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 }
