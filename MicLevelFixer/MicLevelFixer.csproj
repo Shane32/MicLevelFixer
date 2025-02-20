@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
@@ -6,11 +6,16 @@
     <RootNamespace>MicLevelFixer</RootNamespace>
     <AssemblyName>MicLevelFixer</AssemblyName>
     <ApplicationIcon>Resources\AppIcon.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <DebugType>embedded</DebugType>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+	  <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AudioSwitcher.AudioApi" Version="3.0.0" />
     <PackageReference Include="AudioSwitcher.AudioApi.CoreAudio" Version="3.0.3" />
     <PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
   </ItemGroup>
