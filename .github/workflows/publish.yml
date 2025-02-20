@@ -1,0 +1,36 @@
+name: Publish Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build and Publish
+      run: |
+        dotnet publish MicLevelFixer/MicLevelFixer.csproj -c Release -o publish
+        
+    - name: Create ZIP archive
+      run: Compress-Archive -Path publish/* -DestinationPath MicLevelFixer.zip
+      
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./MicLevelFixer.zip
+        asset_name: MicLevelFixer.zip
+        asset_content_type: application/zip
